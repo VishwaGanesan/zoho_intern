@@ -42,15 +42,14 @@ class Request
     private String f_name,l_name,email,mobile,cust_id;
     int length,get_length = 3;
     String s[]={"firstname","lastname","email","mobile"};
-    Request(String s)
+    Request(String s) throws PageNotFound,MethodNotImplemented
     {
         url=s.split("\\s|\\-|\\/|\\=|\\?|\\&");
         length = url.length;
         parser();
     }
-    void parser()
+    void parser()throws PageNotFound,MethodNotImplemented
     {
-        try{
              if(url[1].equals("customers"))
                 {
                     if(url[0].equals("post") && length <=10)
@@ -108,19 +107,9 @@ class Request
                 }
                 else
                 {
-                      System.out.println("error");
+                     throw new PageNotFound("404"); 
                 }
-            }
-         catch(PageNotFound exp)
-         {
-    		System.out.println(exp) ;
-    		System.exit(0);
-    	  }
-    	  catch(MethodNotImplemented exp)
-    	  {
-    	      System.out.println(exp);
-    	      System.exit(0);
-    	  }
+        
     }
 }
 class Customer
@@ -170,17 +159,27 @@ class Customer
         this.customer_id = ++id;
         return id-1;
     }
-    public static String add_customer(String a,String b,String cd,String d)
+    public static String add_customer(String f_name,String l_name,String email,String mobile)
     {
         String s,message;
         int code = 201;
         message = "created";
-        Customer c = new Customer();
-        c.set_first_name(a);
-        c.set_last_name(b);
-        c.set_email(cd);                                  // add mobile_number;
-        c.set_mobile(d);
-        cust.put(c.id,c);
+            if(otp.containsKey(mobile))
+            {
+                code = 400;
+                message = "customer Already Exist";
+            }
+            else
+            {
+                Customer c = new Customer();
+                c.set_first_name(f_name);
+                c.set_last_name(l_name);
+                c.set_email(email);
+            // add mobile_number;
+                c.set_mobile(mobile);
+                cust.put(c.id,c);
+                otp.put(mobile,c.id);
+            }
         s="status code:"+code+",message:"+message;
         return s;
     }
@@ -204,10 +203,22 @@ class Customer
 public class root{
 
      public static void main(String []args){
-       
-        String s = "posts/customers?first_name=vishwa&last_name=ganesan&email=gvishwa1997@gmail.com&mobile=96342422324";
-       String p = "get/customers/1";
-        Request r = new Request(s);
-        Request a = new Request(p);
+            String str;
+            Scanner s = new Scanner(System.in);
+            str=s.nextLine();
+            try
+            {
+                while(!str.equals("exit"))
+                {
+                    Request r = new Request(str);
+                    System.out.println("Exit.. or Continue");
+                    str=s.nextLine();
+                }
+            }
+            catch(Exception e)
+            {
+                System.out.println(e);
+            }
+         
         }
 }
